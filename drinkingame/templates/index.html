@@ -97,12 +97,8 @@
         let players_female = [];
 
         function playSound() {
-            navigator.mediaDevices.getUserMedia({audio: true})
-                .then(() => {
-                    const audio = new Audio('https://www.soundjay.com/button/sounds/button-09.mp3');
-                    audio.play().catch(e => console.log('Audio play failed', e));
-                })
-                .catch(e => console.log('Audio permission issue', e));
+            const audio = new Audio('https://www.soundjay.com/button/sounds/button-09.mp3');
+            audio.play().catch(e => console.log('Audio play failed', e));
         }
 
         function addPlayer() {
