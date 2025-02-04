@@ -166,19 +166,19 @@
         }
 
         function resetGame() {
-        $.ajax({
-            url: '/reset_players',
-            type: 'POST',
-            success: function() {
-                players_male = [];
-                players_female = [];
-                $('#playerList').empty();
-                $('#questionDisplay').text('Tap to get a question');
-                $('#gameScreen').removeClass('active');
-                $('#playerSetupScreen').addClass('active');
-            }
-        });
-}
+            $.ajax({
+                url: '/reset_players',
+                type: 'POST',
+                success: function() {
+                    players_male = [];
+                    players_female = [];
+                    $('#playerList').empty();
+                    $('#questionDisplay').text('Tap to get a question');
+                    $('#gameScreen').removeClass('active');
+                    $('#playerSetupScreen').addClass('active');
+                }
+            });
+        }
 
     </script>
 </body>
