@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafini Party Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0A75AD 0%, #20067f 100%);
+            font-family: 'Poppins', sans-serif;
+            color: #e5e5e5;
+        }
+        .screen { display: none; }
+        .active { display: block; }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-animation {
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-gray-900/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <h1 class="text-4xl text-center mb-8 text-white">Rafini's Party Game</h1>
+
+        <!-- Player Setup Screen -->
+        <div id="playerSetupScreen" class="screen active">
+            <div class="mb-4 space-y-3">
+                <input 
+                    type="text" 
+                    id="playerName" 
+                    placeholder="Player Name 🎉" 
+                    class="w-full p-3 bg-gray-800 text-white border-2 border-gray-700 rounded-lg"
+                >
+                <select 
+                    id="playerGender" 
+                    class="w-full p-3 bg-gray-800 text-white border-2 border-gray-700 rounded-lg"
+                >
+                    <option value="male">♂️ Male</option>
+                    <option value="female">♀️ Female</option>
+                </select>
+                <button 
+                    onclick="addPlayer()" 
+                    class="w-full bg-indigo-700 text-white p-3 rounded-lg hover:bg-indigo-600"
+                >
+                    Add Player 🍸
+                </button>
+            </div>
+
+            <div class="mt-4">
+                <h2 class="font-bold mb-2">Players:</h2>
+                <div id="playerList" class="flex flex-wrap gap-2 mb-4"></div>
+                
+                <button 
+                    onclick="startGame()" 
+                    class="w-full bg-green-800 text-white p-3 rounded-lg hover:bg-green-700"
+                >
+                    Start Party! 🎊
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div 
+                id="questionDisplay" 
+                class="mb-6 p-6 bg-gray-800 rounded-lg text-center text-2xl text-white"
+            >
+                Tap to get a question
+            </div>
+
+            <div class="space-y-4">
+                <button 
+                    onclick="getQuestion()" 
+                    class="w-full bg-purple-800 text-white p-3 rounded-lg hover:bg-purple-700"
+                >
+                    Next Question 🍾
+                </button>
+                <button 
+                    onclick="resetGame()" 
+                    class="w-full bg-red-800 text-white p-3 rounded-lg hover:bg-red-700"
+                >
+                    Reset Party 🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players_male = [];
+        let players_female = [];
+
+        function playSound() {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(() => {
+                    const audio = new Audio('https://www.soundjay.com/button/sounds/button-09.mp3');
+                    audio.play().catch(e => console.log('Audio play failed', e));
+                })
+                .catch(e => console.log('Audio permission issue', e));
+        }
+
+        function addPlayer() {
+            const name = $('#playerName').val();
+            const gender = $('#playerGender').val();
+            
+            if (!name) {
+                alert('Please enter a player name');
+                return;
+            }
+            
+            $.ajax({
+                url: '/add_player',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({name: name, gender: gender}),
+                success: function(response) {
+                    $('#playerName').val('');
+                    if (gender === 'male') {
+                        players_male.push(name);
+                    } else {
+                        players_female.push(name);
+                    }
+                    updatePlayerList();
+                }
+            });
+        }
+
+        function updatePlayerList() {
+            $('#playerList').empty();
+            [...players_male, ...players_female].forEach(player => {
+                $('#playerList').append(`
+                    <span class="bg-gray-700 px-2 py-1 rounded-full text-white">${player}</span>
+                `);
+            });
+        }
+
+        function startGame() {
+            if (players_male.length + players_female.length < 2) {
+                alert('Add at least 2 players');
+                return;
+            }
+            $('#playerSetupScreen').removeClass('active');
+            $('#gameScreen').addClass('active');
+        }
+
+        function getQuestion() {
+            $.ajax({
+                url: '/get_question',
+                type: 'GET',
+                success: function(response) {
+                    const questionEl = $('#questionDisplay');
+                    questionEl.text(response.question);
+                    questionEl.addClass('pop-animation');
+                    playSound();
+                    const audio = new Audio(response.sound);
+                    audio.play().catch(e => console.log('Audio play failed', e));
+                    setTimeout(() => {
+                        questionEl.removeClass('pop-animation');
+                    }, 500);
+                }
+            });
+        }
+
+        function resetGame() {
+            players_male = [];
+            players_female = [];
+            $('#playerList').empty();
+            $('#questionDisplay').text('Tap to get a question');
+            $('#gameScreen').removeClass('active');
+            $('#playerSetupScreen').addClass('active');
+        }
+    </script>
+</body>
+</html>
