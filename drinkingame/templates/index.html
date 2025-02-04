@@ -135,15 +135,18 @@
                 `);
             });
         }
-
+        
         function startGame() {
-            if (players_male.length + players_female.length < 2) {
-                alert('Add at least 2 players');
-                return;
-            }
-            $('#playerSetupScreen').removeClass('active');
-            $('#gameScreen').addClass('active');
+            $.ajax({
+                url: '/reset_players',
+                type: 'POST',
+                success: function() {
+                    $('#playerSetupScreen').removeClass('active');
+                    $('#gameScreen').addClass('active');
+                }
+            });
         }
+
 
         function getQuestion() {
             $.ajax({
