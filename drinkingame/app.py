@@ -4,8 +4,10 @@ import random
 app = Flask(__name__)
 
 # Game state
-players_male = []
-players_female = []
+players = {
+    'male': [],
+    'female': []
+}
 
 # Question list
 question_list = [
@@ -124,15 +126,15 @@ question_list = [
 def select_random(who, exclude=[], gender=None):
     if who == 'random':
         if gender == 'boy':
-            all_players = players_male
+            all_players = players['male']
         elif gender == 'girl':
-            all_players = players_female
+            all_players = players['female']
         else:
-            all_players = players_male + players_female
+            all_players = players['male'] + players['female']
     elif who == 'male':
-        all_players = players_male
+        all_players = players['male']
     elif who == 'female':
-        all_players = players_female
+        all_players = players['female']
     else:
         return "No players available"
     
@@ -148,10 +150,12 @@ def add_player():
     data = request.json
     name = data.get('name')
     gender = data.get('gender')
-    if gender == 'male':
-        players_male.append(name)
-    else:
-        players_female.append(name)
+    
+    # Prevent duplicate names
+    if name in players['male'] or name in players['female']:
+        return jsonify({'success': False, 'message': 'Player already exists!'})
+    
+    players[gender].append(name)
     return jsonify({'success': True, 'message': f'{name} added!'})
 
 @app.route('/get_question', methods=['GET'])
@@ -174,9 +178,14 @@ def get_question():
         player = select_random('random', exclude=players_to_use)
         question = question.replace('{}', player, 1)
         players_to_use.append(player)
-    
-    # Adding sound trigger for new question
-    return jsonify({'question': question, 'sound': 'https://www.soundjay.com/button/sounds/button-09.mp3'})
+
+    return jsonify({'question': question})
+
+@app.route('/reset_game', methods=['POST'])
+def reset_game():
+    players['male'].clear()
+    players['female'].clear()
+    return jsonify({'success': True, 'message': 'Game reset!'})
 
 if __name__ == '__main__':
     app.run(debug=True)

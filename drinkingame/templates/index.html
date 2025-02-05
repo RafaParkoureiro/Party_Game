@@ -137,8 +137,8 @@
         }
         
         function startGame() {
-            if (players_male.length + players_female.length < 2) {
-                alert("You need at least 2 players to start!");
+            if (players_male.length + players_female.length < 3) {
+                alert("You need at least 3 players to start!");
                 return;
             }
             $('#playerSetupScreen').removeClass('active');
@@ -167,9 +167,9 @@
 
         function resetGame() {
             $.ajax({
-                url: '/reset_players',
+                url: '/reset_game',
                 type: 'POST',
-                success: function() {
+                success: function(response) {
                     players_male = [];
                     players_female = [];
                     $('#playerList').empty();
@@ -179,7 +179,6 @@
                 }
             });
         }
-
     </script>
 </body>
 </html>
