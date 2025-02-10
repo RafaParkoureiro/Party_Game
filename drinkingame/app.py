@@ -194,7 +194,6 @@ def get_question():
     difficulty = random.choices(["easy", "medium", "hard"], weights=difficulty_weights, k=1)[0]
     question = random.choice(question_list[difficulty])
     players_to_use = []
-    print(difficulty_weights)
 
     while '{boy}' in question or '{girl}' in question:
         if '{boy}' in question:
